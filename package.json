@@ -1,19 +1,27 @@
 {
   "name": "koishi-plugin-steam-status-subscribe",
-  "description": "",
-  "version": "1.0.0",
+  "description": "Push steam status to group",
+  "version": "0.1.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
     "lib",
     "dist"
   ],
+  "author": "LittleC <i@ltlec.com>",
+  "koishi": {
+    "description": {
+      "en": "Push message to group when steam status changed",
+      "zh": "公示群友有没有在 Steam 摸鱼"
+    }
+  },
   "license": "MIT",
   "scripts": {},
   "keywords": [
     "chatbot",
     "koishi",
-    "plugin"
+    "plugin",
+    "steam"
   ],
   "peerDependencies": {
     "koishi": "^4.11.1"
