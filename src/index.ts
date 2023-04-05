@@ -64,27 +64,47 @@ export function apply(ctx: Context, config: Config) {
       }
       return `删除成功`
     })
+  ctx.command('steam.list', '列出在本群的监听')
+    .action(async ({ session }) => {
+      let list = await ctx.database.get('steam_status', {
+        target: { $el: session.cid }
+      })
+      return list.map(v => `[${v.steamid}] ${v.personaname}`).join('\n')
+    })
   ctx.command('steam.watch <input:string>', '创建监听', { checkArgCount: true })
-    .usage('可输入自定义 URL 的值或 steamid。\n自定义 URL获取：个人资料页面右键复制 URL，选中 /id/ 后到最后一个斜杠之间的内容。')
+    .usage('可输入自定义 URL 的值或 steamid。\n自定义 URL获取：个人资料页面右键复制 URL')
     .action(async ({ session }, input) => {
+      let vanityMatch = input.match(/https?\:\/\/steamcommunity.com\/id\/([A-Za-z_0-9]+)/)
+      let vanityInput = vanityMatch?.[1] || input
+      // @TODO https://steamcommunity.com/profile/
+
       // get by vanity
       let r = await http.get('/ISteamUser/ResolveVanityURL/v0001/', {
         params: {
           key: config.key,
-          vanityurl: input
+          vanityurl: vanityInput
         }
       })
       // 42: not match
-      let steamid = r.response.success === 42 ? input : r.response.steamid
-      const [inDb] = await ctx.database.get('steam_status', {
-        steamid
-      })
+      if (r.response.success === 42 && !/[0-9]{8,}/.test(input)) {
+        return `无此用户`
+      }
+      let steamid = r.response.success === 42 && /[0-9]{8,}/.test(input) ? input : r.response.steamid
+
       let userInfo = await http.get('/ISteamUser/GetPlayerSummaries/v0002/', {
         params: {
           key: config.key,
           steamids: steamid
         }
       })
+      if (userInfo.response.players.length === 0) {
+        return `无此用户`
+      }
+      steamid = userInfo.response.players[0].steamid
+      const [inDb] = await ctx.database.get('steam_status', {
+        steamid
+      })
+
       if (!inDb) {
         await ctx.database.create('steam_status', {
           steamid, personaname: userInfo.response.players[0].personaname, target: [session.cid]
