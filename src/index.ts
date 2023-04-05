@@ -110,10 +110,14 @@ export function apply(ctx: Context, config: Config) {
       gameid ||= null
       dbGameid ||= null
       if (dbGameid !== gameid) {
-        if (gameid) {
+        if (!dbGameid) {
           ctx.broadcast(inDb.target, `${personaname} 正在玩: ${gameextrainfo}`)
-        } else {
+        }
+        if (!gameid && dbGameid) {
           ctx.broadcast(inDb.target, `${personaname} 玩了 ${Math.ceil((new Date().valueOf() - inDb.lastUpdated.valueOf()) / 1000 / 60)} 分钟后, 不玩 ${inDb.gameextrainfo} 了`)
+        }
+        if (dbGameid && gameid) {
+          ctx.broadcast(inDb.target, `${personaname} 玩了 ${Math.ceil((new Date().valueOf() - inDb.lastUpdated.valueOf()) / 1000 / 60)} 分钟后, 不玩 ${inDb.gameextrainfo} 了, 开始玩 ${gameextrainfo}`)
         }
         ctx.database.upsert('steam_status', [{ gameId: gameid, gameextrainfo, steamid: inDb.steamid, lastUpdated: new Date() }])
       }
