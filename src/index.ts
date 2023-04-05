@@ -4,12 +4,14 @@ export const name = 'steam-status-subscribe'
 
 export interface Config {
   endpoint: string;
-  key: string
+  key: string;
+  interval: number;
 }
 
 export const Config: Schema<Config> = Schema.object({
   endpoint: Schema.string().default('https://api.steampowered.com/'),
-  key: Schema.string().required()
+  key: Schema.string().required(),
+  interval: Schema.number().default(10000).description("轮询间隔")
 })
 
 export interface SteamStatus {
@@ -41,7 +43,7 @@ export function apply(ctx: Context, config: Config) {
   const http = ctx.http.extend({
     endpoint: config.endpoint
   })
-  ctx.command('steam.delete <steamid:string>', '删除在本群的监听', {checkArgCount: true})
+  ctx.command('steam.delete <steamid:string>', '删除在本群的监听', { checkArgCount: true })
     .action(async ({ session }, steamid) => {
       const [inDb] = await ctx.database.get('steam_status', {
         steamid
@@ -62,7 +64,7 @@ export function apply(ctx: Context, config: Config) {
       }
       return `删除成功`
     })
-  ctx.command('steam.watch <input:string>', '创建监听', {checkArgCount: true})
+  ctx.command('steam.watch <input:string>', '创建监听', { checkArgCount: true })
     .usage('可输入自定义 URL 的值或 steamid。\n自定义 URL获取：个人资料页面右键复制 URL，选中 /id/ 后到最后一个斜杠之间的内容。')
     .action(async ({ session }, input) => {
       // get by vanity
@@ -122,5 +124,5 @@ export function apply(ctx: Context, config: Config) {
         ctx.database.upsert('steam_status', [{ gameId: gameid, gameextrainfo, steamid: inDb.steamid, lastUpdated: new Date() }])
       }
     }
-  }, 10000)
+  }, config.interval)
 }
