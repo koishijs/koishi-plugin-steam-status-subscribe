@@ -1,4 +1,4 @@
-import { Context, Schema } from 'koishi'
+import { Context, Quester, Schema } from 'koishi'
 
 export const name = 'steam-status-subscribe'
 
@@ -6,12 +6,14 @@ export interface Config {
   endpoint: string;
   key: string;
   interval: number;
+  quester: Quester.Config;
 }
 
 export const Config: Schema<Config> = Schema.object({
   endpoint: Schema.string().default('https://api.steampowered.com/'),
   key: Schema.string().required(),
-  interval: Schema.number().default(10000).description("轮询间隔")
+  interval: Schema.number().default(10000).description("轮询间隔"),
+  quester: Quester.Config,
 })
 
 export interface SteamStatus {
@@ -41,7 +43,8 @@ export function apply(ctx: Context, config: Config) {
     primary: 'steamid'
   })
   const http = ctx.http.extend({
-    endpoint: config.endpoint
+    endpoint: config.endpoint,
+    ...config.quester,
   })
   ctx.command('steam.delete <steamid:string>', '删除在本群的监听', { checkArgCount: true })
     .action(async ({ session }, steamid) => {
