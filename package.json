@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-steam-status-subscribe",
   "description": "Push steam status to group",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -16,7 +16,6 @@
     }
   },
   "license": "MIT",
-  "scripts": {},
   "keywords": [
     "chatbot",
     "koishi",
@@ -24,6 +23,6 @@
     "steam"
   ],
   "peerDependencies": {
-    "koishi": "^4.11.1"
+    "koishi": "^4.14.6"
   }
 }
