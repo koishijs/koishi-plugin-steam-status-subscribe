@@ -2,6 +2,8 @@ import { Context, Quester, Schema } from 'koishi'
 
 export const name = 'steam-status-subscribe'
 
+export const inject = ['http', 'database']
+
 export interface Config {
   endpoint: string;
   key: string;
